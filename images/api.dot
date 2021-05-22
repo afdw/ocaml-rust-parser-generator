@@ -1,0 +1,20 @@
+# Building:
+# neato -Tpng api.dot > api.png
+
+digraph {
+    splines=curved
+    node [shape=circle, width="2"]
+
+    string [pos="0,4.04145188432738035157!"] # 0; 7 * sqrt(3) / 3
+    rs_token_stream [pos="-3.5,-2.02072594216369017578!"] # -7 / 2; -7 * sqrt(3) / 6
+    rs_syn_type [pos="3.5,-2.02072594216369017578!"] # 7 / 2; -7 * sqrt(3) / 6
+
+    string -> rs_token_stream [taillabel="token_stream_of_string", labelangle=40, labeldistance=10]
+    rs_token_stream -> string [taillabel="string_of_token_stream", labelangle=40, labeldistance=10]
+
+    rs_token_stream -> rs_syn_type [taillabel="parse_syn_type_from_token_stream", labelangle=5, labeldistance=11]
+    string -> rs_syn_type [taillabel="parse_syn_type_from_string", labelangle=40, labeldistance=11]
+
+    rs_syn_type -> rs_token_stream [taillabel="generate_syn_type_to_token_stream", labelangle=5, labeldistance=11]
+    rs_syn_type -> string [taillabel="generate_syn_type_to_string", labelangle=40, labeldistance=11]
+}

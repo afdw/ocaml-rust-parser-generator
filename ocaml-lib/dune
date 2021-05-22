@@ -1,0 +1,9 @@
+(library
+ (name ocaml_rust_parser_generator)
+ (public_name ocaml-rust-parser-generator)
+ (foreign_archives ocaml_rust_parser_generator)
+ (c_library_flags (-lpthread)))
+
+(env
+ (dev
+  (flags (:standard -w -30))))

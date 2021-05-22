@@ -1,0 +1,9 @@
+.idea
+/syn
+/target
+/_build
+/rust-lib/src/generated.rs
+/ocaml-lib/ocaml_rust_parser_generator.mli
+/ocaml-lib/ocaml_rust_parser_generator.ml
+/ocaml-lib/dllocaml_rust_parser_generator.so
+/ocaml-lib/libocaml_rust_parser_generator.a

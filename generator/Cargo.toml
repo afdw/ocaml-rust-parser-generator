@@ -1,0 +1,13 @@
+[package]
+name = "ocaml-rust-parser-printer-generator-generator"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+lazy_static = "1.4.0"
+itertools = "0.10.0"
+heck = "0.3.2"
+serde_json = "1.0.64"
+syn = { version = "1.0.72", features = ["full", "visit"] }
+syn-codegen = "0.2.0"
+quote = "1.0.9"

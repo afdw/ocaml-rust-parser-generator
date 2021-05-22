@@ -1,0 +1,3 @@
+(executable
+ (name example)
+ (libraries ocaml-rust-parser-generator shexp.process))
