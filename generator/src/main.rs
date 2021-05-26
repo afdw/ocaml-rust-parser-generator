@@ -202,7 +202,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .output()?;
     if !command_output.status.success() {
         std::io::stderr().write_all(&command_output.stderr)?;
-        return Err("Unable to run `cargo expand --features full`".into());
+        return Err("Unable to run `cargo expand --ugly --features full`".into());
     }
 
     struct Visitor {
