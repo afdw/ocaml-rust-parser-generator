@@ -133,10 +133,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         writeln!(
             types_output,
-            "and {} = rs_span (* {} *)",
+            "and {} = {{ (* {} *)",
             ocaml_type(&syn_codegen::Type::Token(name.to_string())),
             representation
         )?;
+        writeln!(types_output, "  rs_span : rs_span;")?;
+        writeln!(types_output, "}}")?;
     }
 
     // Types for syn_codegen::Type::Std
@@ -274,7 +276,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "Span" => format!("marshal_output_span(marshaling_output, {})", input),
                 _ => unreachable!(),
             },
-            syn_codegen::Type::Token(token) => {
+            syn_codegen::Type::Token(token) => format!(
+                "{{ marshaling_output.add_object(1, 1); marshaling_output.write_header(1, 0); {} }}",
                 if DEFINITIONS.tokens.get(token).unwrap().chars().next().unwrap().is_ascii_alphabetic() {
                     marshal_output_type(
                         &syn_codegen::Type::Ext("Span".to_string()),
@@ -286,7 +289,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         &format!("{}.spans.iter().copied().reduce(|a, b| a.join(b).unwrap()).unwrap()", input)
                     )
                 }
-            }
+            ),
             syn_codegen::Type::Group(_) => marshal_output_type(&syn_codegen::Type::Ext("Span".to_string()), &format!("{}.span", input)),
             syn_codegen::Type::Punctuated(punctuated) => marshal_output_type(
                 &punctuated_representation(punctuated),
@@ -335,7 +338,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "Span" => "marshal_input_span(marshaling_input)".to_string(),
                 _ => unreachable!(),
             },
-            syn_codegen::Type::Token(token) => {
+            syn_codegen::Type::Token(token) => format!(
+                "{{ assert!(matches!(marshaling_input.read_int_or_block(), IntOrBlock::Block(0))); {} }}",
                 if DEFINITIONS.tokens.get(token).unwrap().chars().next().unwrap().is_ascii_alphabetic() {
                     format!(
                         "syn::token::{} {{ span: {} }}",
@@ -350,7 +354,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         DEFINITIONS.tokens.get(token).unwrap().len()
                     )
                 }
-            }
+            ),
             syn_codegen::Type::Group(group) => format!(
                 "syn::token::{} {{ span: {} }}",
                 group,
