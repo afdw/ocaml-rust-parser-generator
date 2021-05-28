@@ -59,8 +59,9 @@ val generate_syn_type_to_string : rs_syn_type -> string
 
 ## Building and running
 
-The library can be built by executing the following command (Rust and OCaml with
-Dune required):
+The library can be built by executing the following command (Rust
+with `cargo-expand`, which can be installed using the
+command `cargo install cargo-expand`, and OCaml with Dune are required):
 
 ```shell
 make build
