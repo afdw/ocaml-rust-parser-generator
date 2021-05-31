@@ -513,6 +513,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     writeln!(mli_file)?;
     writeln!(mli_file, "val token_stream_of_string : string -> rs_token_stream")?;
     writeln!(mli_file, "val string_of_token_stream : rs_token_stream -> string")?;
+    writeln!(mli_file, "val span_of_token_stream : rs_token_stream -> rs_span")?;
 
     writeln!(ml_file)?;
     writeln!(
@@ -523,12 +524,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ml_file,
         "external native_string_of_token_stream : bytes -> string = \"native_string_of_token_stream\""
     )?;
+    writeln!(
+        ml_file,
+        "external native_span_of_token_stream : bytes -> bytes = \"native_span_of_token_stream\""
+    )?;
 
     writeln!(ml_file)?;
     writeln!(ml_file, "let token_stream_of_string x = Marshal.from_bytes (native_token_stream_of_string x) 0")?;
     writeln!(
         ml_file,
         "let string_of_token_stream x = native_string_of_token_stream (Marshal.to_bytes x [Marshal.No_sharing])"
+    )?;
+    writeln!(
+        ml_file,
+        "let span_of_token_stream x = Marshal.from_bytes (native_span_of_token_stream (Marshal.to_bytes x [Marshal.No_sharing])) 0"
     )?;
 
     for node in &DEFINITIONS.types {
@@ -561,6 +570,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 type_name.to_snake_case()
             )?;
             writeln!(mli_file, "val generate_{0}_to_string : rs_{0} -> string", type_name.to_snake_case())?;
+            writeln!(mli_file, "val span_of_{0} : rs_{0} -> rs_span", type_name.to_snake_case())?;
         }
 
         writeln!(ml_file)?;
@@ -587,6 +597,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "external native_generate_{0}_to_string : bytes -> string = \"native_generate_{0}_to_string\"",
                 type_name.to_snake_case()
             )?;
+            writeln!(
+                ml_file,
+                "external native_span_of_{0} : bytes -> bytes = \"native_span_of_{0}\"",
+                type_name.to_snake_case()
+            )?;
         }
 
         writeln!(ml_file)?;
@@ -611,6 +626,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             writeln!(
                 ml_file,
                 "let generate_{0}_to_string x = native_generate_{0}_to_string (Marshal.to_bytes x [Marshal.No_sharing])",
+                type_name.to_snake_case()
+            )?;
+            writeln!(
+                ml_file,
+                "let span_of_{0} x = Marshal.from_bytes (native_span_of_{0} (Marshal.to_bytes x [Marshal.No_sharing])) 0",
                 type_name.to_snake_case()
             )?;
         }
@@ -680,6 +700,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "    marshal_input_{}(&mut marshaling_input).to_token_stream().to_string()",
                 type_name.to_snake_case()
             )?;
+            writeln!(rust_file, "}}")?;
+            writeln!(rust_file)?;
+            writeln!(rust_file, "#[ocaml::func]")?;
+            writeln!(rust_file, "pub fn native_span_of_{}(x: &[u8]) -> ocaml::Value {{", type_name.to_snake_case())?;
+            writeln!(rust_file, "    let mut marshaling_input = MarshalingInput::new(x.into());")?;
+            writeln!(rust_file, "    let mut marshaling_output = MarshalingOutput::new();")?;
+            writeln!(
+                rust_file,
+                "    marshal_output_span(&mut marshaling_output, marshal_input_{}(&mut marshaling_input).span());",
+                type_name.to_snake_case()
+            )?;
+            writeln!(rust_file, "    unsafe {{ ocaml::Value::bytes(&marshaling_output.finish()) }}")?;
             writeln!(rust_file, "}}")?;
         }
     }

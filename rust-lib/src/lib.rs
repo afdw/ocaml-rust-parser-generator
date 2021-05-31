@@ -3,6 +3,7 @@ use std::{
     io::{Cursor, Read, Write},
     str::FromStr,
 };
+use syn::spanned::Spanned;
 
 const MAGIC_NUMBER_SMALL: u32 = 0x8495A6BE;
 const MAGIC_NUMBER_BIG: u32 = 0x8495A6BF;
@@ -519,6 +520,14 @@ pub fn native_token_stream_of_string(x: &str) -> ocaml::Value {
 pub fn native_string_of_token_stream(x: &[u8]) -> String {
     let mut marshaling_input = MarshalingInput::new(x.into());
     marshal_input_token_stream(&mut marshaling_input).to_string()
+}
+
+#[ocaml::func]
+pub fn native_span_of_token_stream(x: &[u8]) -> ocaml::Value {
+    let mut marshaling_input = MarshalingInput::new(x.into());
+    let mut marshaling_output = MarshalingOutput::new();
+    marshal_output_span(&mut marshaling_output, marshal_input_token_stream(&mut marshaling_input).span());
+    unsafe { ocaml::Value::bytes(&marshaling_output.finish()) }
 }
 
 include!("generated.rs");

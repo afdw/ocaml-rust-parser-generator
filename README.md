@@ -47,12 +47,13 @@ type rs_syn_type = ...
 
 val token_stream_of_string : string -> rs_token_stream
 val string_of_token_stream : rs_token_stream -> string
+val span_of_token_stream : rs_token_stream -> rs_span
 
 val parse_syn_type_from_token_stream : rs_token_stream -> rs_syn_type
 val parse_syn_type_from_string : string -> rs_syn_type
-
 val generate_syn_type_to_token_stream : rs_syn_type -> rs_token_stream
 val generate_syn_type_to_string : rs_syn_type -> string
+val span_of_syn_type : rs_syn_type -> rs_span
 ```
 
 ![API](images/api.png)
