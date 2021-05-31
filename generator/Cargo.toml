@@ -1,5 +1,5 @@
 [package]
-name = "ocaml-rust-parser-printer-generator-generator"
+name = "ocaml-rust-parser-generator-generator"
 version = "0.1.0"
 edition = "2018"
 
