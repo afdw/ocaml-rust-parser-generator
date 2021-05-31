@@ -3,3 +3,6 @@ members = [
     "generator",
     "rust-lib",
 ]
+
+[patch.crates-io]
+proc-macro2 = { path = "proc-macro2" }

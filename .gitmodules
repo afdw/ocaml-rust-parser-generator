@@ -1,0 +1,4 @@
+[submodule "proc-macro2"]
+	path = proc-macro2
+	url = https://github.com/afdw/proc-macro2
+	branch = adhoc-custom-spans

@@ -28,3 +28,6 @@ let _ =
   print_string "Count of the items in the file: ";
   print_int (List.length ((Ocaml_rust_parser_generator.parse_file_from_string code).rs_items));
   print_newline ();
+  print_string "Everything is preserved when tuning rs_file into a rs_token_stream and back: ";
+  print_string (if (Ocaml_rust_parser_generator.parse_file_from_token_stream (Ocaml_rust_parser_generator.generate_file_to_token_stream (Ocaml_rust_parser_generator.parse_file_from_string code)) = Ocaml_rust_parser_generator.parse_file_from_string code) then "true" else "false");
+  print_newline ();

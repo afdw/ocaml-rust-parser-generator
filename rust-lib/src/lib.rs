@@ -323,8 +323,10 @@ fn marshal_input_token_tree(marshaling_input: &mut MarshalingInput) -> proc_macr
                 _ => panic!("Unknown tag for Delimiter"),
             };
             let stream = marshal_input_token_stream(marshaling_input);
-            let _span = marshal_input_span(marshaling_input);
-            proc_macro2::TokenTree::Group(proc_macro2::Group::new(delimiter, stream))
+            let span = marshal_input_span(marshaling_input);
+            let mut group = proc_macro2::Group::new(delimiter, stream);
+            group.set_span(span);
+            proc_macro2::TokenTree::Group(group)
         }
         IntOrBlock::Block(1) => proc_macro2::TokenTree::Ident(marshal_input_ident(marshaling_input)),
         IntOrBlock::Block(2) => {
@@ -335,8 +337,10 @@ fn marshal_input_token_tree(marshaling_input: &mut MarshalingInput) -> proc_macr
                 1 => proc_macro2::Spacing::Joint,
                 _ => panic!("Unknown tag for Spacing"),
             };
-            let _span = marshal_input_span(marshaling_input);
-            proc_macro2::TokenTree::Punct(proc_macro2::Punct::new(char, spacing))
+            let span = marshal_input_span(marshaling_input);
+            let mut punct = proc_macro2::Punct::new(char, spacing);
+            punct.set_span(span);
+            proc_macro2::TokenTree::Punct(punct)
         }
         IntOrBlock::Block(3) => proc_macro2::TokenTree::Literal(marshal_input_literal(marshaling_input)),
         _ => panic!("Unknown tag for TokenTree"),
@@ -361,8 +365,10 @@ fn marshal_output_literal(marshaling_output: &mut MarshalingOutput, value: proc_
 fn marshal_input_literal(marshaling_input: &mut MarshalingInput) -> proc_macro2::Literal {
     assert!(matches!(marshaling_input.read_int_or_block(), IntOrBlock::Block(0)));
     let text = marshal_input_string(marshaling_input);
-    let _span = marshal_input_span(marshaling_input);
-    proc_macro2::Literal::from_str(&text).unwrap()
+    let span = marshal_input_span(marshaling_input);
+    let mut literal = proc_macro2::Literal::from_str(&text).unwrap();
+    literal.set_span(span);
+    literal
 }
 
 fn marshal_output_ident(marshaling_output: &mut MarshalingOutput, value: proc_macro2::Ident) {
@@ -376,7 +382,11 @@ fn marshal_input_ident(marshaling_input: &mut MarshalingInput) -> proc_macro2::I
     assert!(matches!(marshaling_input.read_int_or_block(), IntOrBlock::Block(0)));
     let string = marshal_input_string(marshaling_input);
     let span = marshal_input_span(marshaling_input);
-    proc_macro2::Ident::new(&string, span)
+    if let Some(strip) = string.strip_prefix("r#") {
+        proc_macro2::Ident::new_raw(strip, span)
+    } else {
+        proc_macro2::Ident::new(&string, span)
+    }
 }
 
 fn marshal_output_line_column(marshaling_output: &mut MarshalingOutput, value: proc_macro2::LineColumn) {
@@ -396,10 +406,7 @@ fn marshal_input_line_column(marshaling_input: &mut MarshalingInput) -> proc_mac
 fn marshal_output_span(marshaling_output: &mut MarshalingOutput, value: proc_macro2::Span) {
     marshaling_output.add_object(3, 3);
     marshaling_output.write_header(3, 0);
-    #[cfg(procmacro2_semver_exempt)]
     let source_file = value.source_file().path().to_string_lossy().to_string();
-    #[cfg(not(procmacro2_semver_exempt))]
-    let source_file = "<unknown>".to_string();
     marshal_output_string(marshaling_output, source_file);
     marshal_output_line_column(marshaling_output, value.start());
     marshal_output_line_column(marshaling_output, value.end());
@@ -407,10 +414,10 @@ fn marshal_output_span(marshaling_output: &mut MarshalingOutput, value: proc_mac
 
 fn marshal_input_span(marshaling_input: &mut MarshalingInput) -> proc_macro2::Span {
     assert!(matches!(marshaling_input.read_int_or_block(), IntOrBlock::Block(0)));
-    let _source_file = marshal_input_string(marshaling_input);
-    let _start = marshal_input_line_column(marshaling_input);
-    let _end = marshal_input_line_column(marshaling_input);
-    proc_macro2::Span::call_site()
+    let source_file = marshal_input_string(marshaling_input);
+    let start = marshal_input_line_column(marshaling_input);
+    let end = marshal_input_line_column(marshaling_input);
+    proc_macro2::Span::new_custom(&source_file, start, end)
 }
 
 fn marshal_output_lit_byte_str(marshaling_output: &mut MarshalingOutput, value: syn::LitByteStr) {
