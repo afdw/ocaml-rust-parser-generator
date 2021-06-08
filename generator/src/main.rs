@@ -290,7 +290,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     )
                 }
             ),
-            syn_codegen::Type::Group(_) => marshal_output_type(&syn_codegen::Type::Ext("Span".to_string()), &format!("{}.span", input)),
+            syn_codegen::Type::Group(_) => format!(
+                "{{ marshaling_output.add_object(1, 1); marshaling_output.write_header(1, 0); {} }}",
+                marshal_output_type(&syn_codegen::Type::Ext("Span".to_string()), &format!("{}.span", input))
+            ),
             syn_codegen::Type::Punctuated(punctuated) => marshal_output_type(
                 &punctuated_representation(punctuated),
                 &format!("{}.into_pairs().map(|pair| match pair {{ syn::punctuated::Pair::Punctuated(t, p) => (t, Some(p)), syn::punctuated::Pair::End(t) => (t, None) }}).collect()", input),
@@ -356,7 +359,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             ),
             syn_codegen::Type::Group(group) => format!(
-                "syn::token::{} {{ span: {} }}",
+                "{{ assert!(matches!(marshaling_input.read_int_or_block(), IntOrBlock::Block(0))); syn::token::{} {{ span: {} }} }}",
                 group,
                 marshal_input_type(&syn_codegen::Type::Ext("Span".to_string()))
             ),
