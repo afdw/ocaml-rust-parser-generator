@@ -60,9 +60,8 @@ val span_of_syn_type : rs_syn_type -> rs_span
 
 ## Building and running
 
-The library can be built by executing the following command (Rust
-with `cargo-expand`, which can be installed using the
-command `cargo install cargo-expand`, and OCaml with Dune are required):
+The library can be built by executing the following command (Rust and OCaml
+with Dune are required):
 
 ```shell
 make build

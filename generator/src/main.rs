@@ -197,14 +197,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let command_output = Command::new("cargo")
         .current_dir("../syn")
-        .arg("expand")
-        .arg("--ugly")
+        .arg("rustc")
         .arg("--features")
         .arg("full")
+        .arg("--")
+        .arg("-Z")
+        .arg("unpretty=expanded")
         .output()?;
     if !command_output.status.success() {
         std::io::stderr().write_all(&command_output.stderr)?;
-        return Err("Unable to run `cargo expand --ugly --features full`".into());
+        return Err("Unable to run `cargo rustc --features full -- -Z unpretty=expanded`".into());
     }
 
     struct Visitor {
