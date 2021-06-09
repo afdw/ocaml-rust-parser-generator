@@ -396,8 +396,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     node.ident.to_snake_case(),
                     node.ident
                 )?;
-                writeln!(rust_file, "    marshaling_output.add_object({0}, {0});", r#struct.len())?;
-                writeln!(rust_file, "    marshaling_output.write_header({}, 0);", r#struct.len())?;
+                let struct_fields_count = r#struct
+                    .into_iter()
+                    .filter(|(_, r#type)| r#type != &&syn_codegen::Type::Syn("Reserved".to_string()))
+                    .count();
+                writeln!(rust_file, "    marshaling_output.add_object({0}, {0});", struct_fields_count)?;
+                writeln!(rust_file, "    marshaling_output.write_header({}, 0);", struct_fields_count)?;
                 for (name, r#type) in r#struct {
                     if r#type == &syn_codegen::Type::Syn("Reserved".to_string()) {
                         continue;
