@@ -197,6 +197,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let command_output = Command::new("cargo")
         .current_dir("../syn")
+        .arg("+nightly")
         .arg("rustc")
         .arg("--features")
         .arg("full")
@@ -206,7 +207,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .output()?;
     if !command_output.status.success() {
         std::io::stderr().write_all(&command_output.stderr)?;
-        return Err("Unable to run `cargo rustc --features full -- -Z unpretty=expanded`".into());
+        return Err("Unable to run `cargo rustc +nightly --features full -- -Z unpretty=expanded`".into());
     }
 
     struct Visitor {
