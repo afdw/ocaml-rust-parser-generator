@@ -31,13 +31,13 @@ impl MarshalingOutput {
     fn write_int(&mut self, n: u64) {
         if n as i64 >= 0 && (n as i64) < 0x40 {
             self.data.write_u8(0x40 + n as u8).unwrap();
-        } else if n as i64 >= -(1 << 7) && n as i64 <= 1 << 7 {
+        } else if n as i64 >= -(1 << 7) && (n as i64) < 1 << 7 {
             self.data.write_u8(0x00).unwrap();
             self.data.write_u8(n as u8).unwrap();
-        } else if n as i64 >= -(1 << 15) && n as i64 <= 1 << 15 {
+        } else if n as i64 >= -(1 << 15) && (n as i64) < 1 << 15 {
             self.data.write_u8(0x01).unwrap();
             self.data.write_u16::<BigEndian>(n as u16).unwrap();
-        } else if n as i64 >= -(1 << 30) && n as i64 <= 1 << 30 {
+        } else if n as i64 >= -(1 << 30) && (n as i64) < 1 << 30 {
             self.data.write_u8(0x02).unwrap();
             self.data.write_u32::<BigEndian>(n as u32).unwrap();
         } else {
